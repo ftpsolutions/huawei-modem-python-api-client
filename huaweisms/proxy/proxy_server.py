@@ -115,7 +115,7 @@ class FlaskAppWrapper(object):
         self._modem_data = modem_data
 
         self._add_endpoint(
-            endpoint="/html/index.html", handler=self._index_page_handler
+            endpoint="/html/index.html", endpoint_name="index", handler=self._index_page_handler
         )
         for endpoint in END_POINTS:
             self._add_endpoint(
