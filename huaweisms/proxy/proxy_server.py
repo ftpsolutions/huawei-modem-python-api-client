@@ -1,25 +1,18 @@
+import logging
 import sys
 import threading
-import logging
-import time
 import traceback
 
-import SimpleHTTPServer
-import SocketServer
-
 from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, Response
 
 from huaweisms.api.common import get_from_url_raw, check_error
 from huaweisms.api.user import quick_login
-
-
 # All of these endpoints return content type application/xml
 from huaweisms.proxy import settings
 from huaweisms.xml.util import parse_xml_string
 
-
 logger = logging.getLogger("proxy_server")
-
 
 END_POINTS = [
     "/api/device/signal",
@@ -114,14 +107,49 @@ class ModemScraper(object):
             self._modem_data.log_contents()
 
 
-class ModemProxyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
-    pass
+class FlaskAppWrapper(object):
+    app = None
 
+    def __init__(self, name, modem_data):
+        self.app = Flask(name)
+        self._modem_data = modem_data
 
-def create_http_server(port):
-    return SocketServer.TCPServer(
-        ("", port), ModemProxyRequestHandler
-    )
+        self._add_endpoint(
+            endpoint="/html/index.html", handler=self._index_page_handler
+        )
+        for endpoint in END_POINTS:
+            self._add_endpoint(
+                endpoint=endpoint,
+                handler=self._get_modem_data_end_point_handler(endpoint),
+            )
+
+    def run(self, port):
+        self.app.run(port=port)
+
+    def _add_endpoint(self, endpoint=None, endpoint_name=None, handler=None):
+        self.app.add_url_rule(endpoint, endpoint_name, handler)
+
+    def _get_modem_data_end_point_handler(self, endpoint):
+        def handler(request, server):
+            return Response(
+                response=self._modem_data.get(endpoint), content_type="application/xml"
+            )
+
+        return handler
+
+    def _index_page_handler(self, request, server):
+        return Response(
+            response="""<!doctype html>
+<html>
+  <head>
+    <title>Hello World</title>
+  </head>
+  <body>
+    <p>Hello World</p>
+  </body>
+</html>""",
+            content_type="application/html",
+        )
 
 
 def setup_stdout_root_logger(level=logging.DEBUG):
@@ -148,8 +176,8 @@ def main():
 
     try:
         scheduler.start()
-        server = create_http_server(settings.HTTP_SERVER_PORT)
-        server.serve_forever()
+        app = FlaskAppWrapper(name="ModemProxy", modem_data=modem_data)
+        app.run(port=settings.HTTP_SERVER_PORT)
     except KeyboardInterrupt:
         print("Waiting to exit...")
     finally:
