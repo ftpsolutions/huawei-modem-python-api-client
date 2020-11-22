@@ -47,7 +47,9 @@ class ModemData(object):
         """
         with self._lock:
             for key, value in self._data.items():
+                logger.debug("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ START MODEM DATA")
                 logger.debug("{key}={value}".format(key=key, value=value))
+                logger.debug("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ END MODEM DATA")
 
 
 class ModemScraper(object):
@@ -136,7 +138,7 @@ class FlaskAppWrapper(object):
     def _get_modem_data_end_point_handler(self, endpoint):
         def handler(*ars, **kwargs):
             return Response(
-                response=self._modem_data.get(endpoint), content_type="application/xml"
+                response=self._modem_data.get_data(endpoint), content_type="application/xml"
             )
 
         return handler
