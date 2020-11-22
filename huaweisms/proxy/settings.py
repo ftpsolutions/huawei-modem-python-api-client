@@ -7,6 +7,6 @@ ERROR_COUNTDOWN = 7
 
 try:
     # Get overrides from local settings
-    from huaweisms.api.proxy.local_settings import *
+    from huaweisms.proxy.local_settings import *
 except ImportError:
     pass
