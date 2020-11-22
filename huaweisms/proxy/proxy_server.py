@@ -127,7 +127,8 @@ class FlaskAppWrapper(object):
         self.app.run(port=port)
 
     def _add_endpoint(self, endpoint=None, endpoint_name=None, handler=None):
-        self.app.add_url_rule(endpoint, endpoint_name, handler)
+        self.app.add_url_rule(endpoint, endpoint_name, handler,
+                              strict_slashes=False)
 
     def _get_modem_data_end_point_handler(self, endpoint):
         def handler(request, server):
