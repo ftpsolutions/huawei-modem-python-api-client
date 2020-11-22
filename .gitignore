@@ -13,3 +13,5 @@ dist/*
 
 coverage.xml
 .coverage
+
+.python-version
