@@ -134,14 +134,14 @@ class FlaskAppWrapper(object):
                               strict_slashes=False)
 
     def _get_modem_data_end_point_handler(self, endpoint):
-        def handler(request, server):
+        def handler(*ars, **kwargs):
             return Response(
                 response=self._modem_data.get(endpoint), content_type="application/xml"
             )
 
         return handler
 
-    def _index_page_handler(self, request, server):
+    def _index_page_handler(self, *args, **kwargs):
         return Response(
             response="""<!doctype html>
 <html>
