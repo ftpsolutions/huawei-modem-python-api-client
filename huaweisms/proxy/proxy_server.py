@@ -77,8 +77,13 @@ class ModemScraper(object):
                 )
 
             # Begin the scrape...
-            for url in END_POINTS:
-                result = get_from_url_raw(url=url, ctx=self._ctx)
+            for end_point in END_POINTS:
+                result = get_from_url_raw(
+                    url="http://{host}{end_point}".format(
+                        host=settings.MODEM_HOST, end_point=end_point
+                    ),
+                    ctx=self._ctx,
+                )
                 if result.status_code == 200:
                     text = result.text
                     xmldoc = parse_xml_string(text)
@@ -91,7 +96,7 @@ class ModemScraper(object):
                         break
 
                     # Everything is OK - store the result
-                    self._modem_data.set_data(key=url, value=text)
+                    self._modem_data.set_data(key=end_point, value=text)
 
         except Exception:
             # Don't blow up or it will break APScheduler
