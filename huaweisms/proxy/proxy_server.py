@@ -4,6 +4,9 @@ import logging
 import time
 import traceback
 
+import SimpleHTTPServer
+import SocketServer
+
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from huaweisms.api.common import get_from_url_raw, check_error
@@ -45,6 +48,10 @@ class ModemData(object):
             return self._data.get(key, None)
 
     def log_contents(self):
+        """
+        Just for debugging
+        :return:
+        """
         with self._lock:
             for key, value in self._data.items():
                 logger.debug("{key}={value}".format(key=key, value=value))
@@ -107,6 +114,16 @@ class ModemScraper(object):
             self._modem_data.log_contents()
 
 
+class ModemProxyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
+    pass
+
+
+def create_http_server(port):
+    return SocketServer.TCPServer(
+        ("", port), ModemProxyRequestHandler
+    )
+
+
 def setup_stdout_root_logger(level=logging.DEBUG):
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
@@ -131,13 +148,10 @@ def main():
 
     try:
         scheduler.start()
-
-        while True:
-            try:
-                time.sleep(1)
-            except KeyboardInterrupt:
-                print("Waiting to exit...")
-                break
+        server = create_http_server(settings.HTTP_SERVER_PORT)
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("Waiting to exit...")
     finally:
         scheduler.shutdown()
 
@@ -145,5 +159,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
