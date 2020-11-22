@@ -120,6 +120,7 @@ class FlaskAppWrapper(object):
         for endpoint in END_POINTS:
             self._add_endpoint(
                 endpoint=endpoint,
+                endpoint_name=endpoint.replace("/", "_"),
                 handler=self._get_modem_data_end_point_handler(endpoint),
             )
 
@@ -127,6 +128,8 @@ class FlaskAppWrapper(object):
         self.app.run(port=port)
 
     def _add_endpoint(self, endpoint=None, endpoint_name=None, handler=None):
+        if endpoint_name is None:
+            raise ValueError("end point name cannot be None")
         self.app.add_url_rule(endpoint, endpoint_name, handler,
                               strict_slashes=False)
 
