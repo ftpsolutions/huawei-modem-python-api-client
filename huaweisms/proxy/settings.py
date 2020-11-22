@@ -6,7 +6,7 @@ MODEM_HOST = "192.168.1.1"
 ERROR_COUNTDOWN = 7
 
 # Normally no need to change this
-HTTP_SERVER_PORT = 80
+HTTP_SERVER_PORT = 8000
 
 try:
     # Get overrides from local settings
