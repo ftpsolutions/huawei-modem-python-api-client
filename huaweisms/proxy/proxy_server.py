@@ -1,6 +1,7 @@
 import sys
 import threading
 import logging
+import time
 import traceback
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -118,8 +119,17 @@ def main():
 
     try:
         scheduler.start()
+
+        while True:
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                print("Waiting to exit...")
+                break
     finally:
         scheduler.shutdown()
+
+    print("Done")
 
 
 if __name__ == "__main__":
