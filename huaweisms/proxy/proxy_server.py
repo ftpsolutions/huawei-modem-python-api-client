@@ -67,6 +67,11 @@ class ModemScraper(object):
 
             if self._ctx is None:
                 # Log in required - This is all hard-coded
+                logger.debug(
+                    "Attempting to login with {} / {} / {}".format(
+                        settings.USERNAME, settings.PASSWORD, settings.MODEM_HOST
+                    )
+                )
                 self._ctx = quick_login(
                     settings.USERNAME, settings.PASSWORD, settings.MODEM_HOST
                 )
@@ -91,6 +96,8 @@ class ModemScraper(object):
         except Exception:
             # Don't blow up or it will break APScheduler
             logger.error("Error in scraper:\n{}".format(traceback.format_exc()))
+            self._ctx = None
+            self._error_countdown = settings.ERROR_COUNTDOWN
         finally:
             self._modem_data.log_contents()
 
